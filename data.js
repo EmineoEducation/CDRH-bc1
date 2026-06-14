@@ -511,8 +511,44 @@ window.LUMIO_DATA = {
     "footer": "<em>1 jour fictif ≈ 11 minutes réelles · ratio ×74</em>"
   },
   "trash": {
-    "title": "La corbeille est vide.",
-    "body": "Mais l'idée est bonne. La plupart des consultants commencent par jeter quelque chose."
+    "items": [
+      {
+        "name": "draft_charte_teletravail_v1.docx",
+        "size": "22 Ko",
+        "date": "7 mars",
+        "icon": "docx"
+      },
+      {
+        "name": "ancien_organigramme_rh.png",
+        "size": "186 Ko",
+        "date": "10 mars",
+        "icon": "img"
+      },
+      {
+        "name": "backup_contacts_perso.vcf",
+        "size": "1 Ko",
+        "date": "13 mars",
+        "icon": "vcf",
+        "trigger": "whatsapp"
+      }
+    ],
+    "whatsapp": {
+      "contact": "Jakob Rein",
+      "subtitle": "Northgate Capital",
+      "messages": [
+        { "from": "Jakob Rein", "side": "left",  "time": "21:03", "text": "Théo. On se parle ce soir ?" },
+        { "from": "Théo Marczak", "side": "right", "time": "21:08", "text": "Je suis dispo. Qu'est-ce qui se passe ?" },
+        { "from": "Jakob Rein", "side": "left",  "time": "21:09", "text": "L'audit RH que tu m'as soumis en dataroom en février — c'était incomplet. Il manquait les avenants, les situations individuelles." },
+        { "from": "Théo Marczak", "side": "right", "time": "21:11", "text": "Jakob on a 47 salariés. On ne peut pas tout mettre dans un dataroom à froid." },
+        { "from": "Jakob Rein", "side": "left",  "time": "21:12", "text": "Je ne te parle pas de tout. Je te parle des fragilités. Tu as des situations sensibles dans ton équipe ?" },
+        { "from": "Théo Marczak", "side": "right", "time": "21:14", "text": "... quelques-unes. Comme toutes les boîtes de notre taille." },
+        { "from": "Jakob Rein", "side": "left",  "time": "21:14", "text": "Documentées ?" },
+        { "from": "Théo Marczak", "side": "right", "time": "21:16", "text": "Pas encore. On était en mode croissance." },
+        { "from": "Jakob Rein", "side": "left",  "time": "21:17", "text": "Alors mandate quelqu'un d'externe. Rapidement. Le closing ne peut pas se faire sur une data room incomplète. Surtout sur le social." },
+        { "from": "Jakob Rein", "side": "left",  "time": "21:18", "text": "Théo — discret. Ce cadrage reste entre nous avant le kick-off officiel." },
+        { "from": "Théo Marczak", "side": "right", "time": "21:22", "text": "Reçu." }
+      ]
+    }
   },
   "slack": {
     "workspace": "Lumio Health",
@@ -534,6 +570,13 @@ window.LUMIO_DATA = {
         "color": "#134547",
         "status": "online",
         "isCommanditaire": true
+      },
+      {
+        "id": "sonia",
+        "name": "Sonia Ferracci",
+        "avatar": "SF",
+        "color": "#1a6641",
+        "status": "online"
       }
     ],
     "seed": {
@@ -559,12 +602,30 @@ window.LUMIO_DATA = {
           "time": "08:52",
           "text": "je te mandate officiellement sur ce dossier — j'ai besoin d'un état des lieux RH complet d'ici vendredi 21 mars, avec les points de non-conformité identifiés et un plan d'action priorisé. on en parle à 10h ?"
         }
+      ],
+      "sonia": [
+        {
+          "from": "Sonia Ferracci",
+          "avatar": "SF",
+          "color": "#1a6641",
+          "time": "09:14",
+          "text": "Bonjour {{PRENOM}}. J'ai cru comprendre que tu pilotais l'audit RH pour le closing Northgate ?"
+        },
+        {
+          "from": "Sonia Ferracci",
+          "avatar": "SF",
+          "color": "#1a6641",
+          "time": "09:16",
+          "text": "Je suppose que tu as reçu ma demande sur le télétravail. Je veux qu'on en parle avant que Théo mette le dossier sous cloche — il y a des éléments de contexte que tu n'as pas dans le dossier officiel."
+        }
       ]
     }
   },
   "slackPrompts": {
     "commanditaire": "Tu es Théo Marczak, CEO de Lumio Health chez Lumio Health. Tu réponds à {{PRENOM}}, consultant·e externe sur la mission \"Opération Pulse — Restructuration RH post-levée de fonds Série B\". Tu évalues sans expliquer, tu relances sans donner la réponse, tu simules la pression hiérarchique. Tu réponds en 2-3 messages courts séparés par ---SPLIT---. Pas de longs développements.",
-    "commanditaireLivrable": "Tu es Théo Marczak. Tu viens de recevoir le livrable de {{PRENOM}}. Tu réagis en 2-3 messages courts séparés par ---SPLIT---. Tu pointes ce qui te paraît juste et ce qui te paraît faible, sans expliquer comment corriger."
+    "commanditaireLivrable": "Tu es Théo Marczak. Tu viens de recevoir le livrable de {{PRENOM}}. Tu réagis en 2-3 messages courts séparés par ---SPLIT---. Tu pointes ce qui te paraît juste et ce qui te paraît faible, sans expliquer comment corriger.",
+    "sonia": "Tu es Sonia Ferracci, Directrice Marketing de Lumio Health, arrivée en janvier 2026. Tu parles à {{PRENOM}}, consultant·e RH externe en charge de l'audit Opération Pulse. Tu as fait une demande officielle de passage à 4 jours de télétravail pour ton équipe de 5 personnes. Tu es directe, légèrement sur la défensive, convaincue d'avoir raison. Tu ignores totalement la situation médicale de Yassine Morel — tu pensais que ses absences répétées étaient du désengagement. Tu évalues sans expliquer, tu poses des questions rhétoriques qui révèlent ta position. Tu réponds en 2-3 messages courts séparés par ---SPLIT---. Pas de longs développements.",
+    "soniaLivrable": "Tu es Sonia Ferracci. Tu viens de lire le livrable RH de {{PRENOM}}. Tu réagis en 2-3 messages courts séparés par ---SPLIT---. Tu pointes ce qui concerne ta demande télétravail, et si le livrable mentionne la situation de Yassine Morel, tu laisses transparaître (avec malaise) que tu n'avais pas mesuré la dimension handicap."
   },
   "pressArticles": [
     {
