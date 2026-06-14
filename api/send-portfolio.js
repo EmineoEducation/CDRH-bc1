@@ -2,13 +2,13 @@
 //  ÉMINÉO — api/send-portfolio.js
 //  Envoi du portfolio de fin de parcours via Resend
 //  + coche de completion sur le portail (Redis du portail).
-//  ⚠️  bloc-1 et cdrh-pac.vercel.app sont substitués par le générateur
+//  ⚠️  bc1 et cdrh-pac.vercel.app sont substitués par le générateur
 //      au moment du ZIP. Ne PAS les remplacer à la main.
 // ============================================================
 
 import { createHash } from 'crypto';
 
-const BLOC_ID     = 'bloc-1';     // ex: 'bc1', 'bc2'... ou 'cdrh-bc1'
+const BLOC_ID     = 'bc1';     // ex: 'bc1', 'bc2'... ou 'cdrh-bc1'
 const PORTAL_HOST = 'cdrh-pac.vercel.app'; // ex: 'msmc-pac.vercel.app', 'cdrh-pac.vercel.app'
 
 const PORTFOLIO_FROM =
