@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  LIVRABLE APP · PAC bloc-1 · Responsable Ressources Humaines
+//  LIVRABLE APP · PAC bc1 · Chargé de développement des ressources humaines
 //  Composant générique — lit tout depuis window.PAC_CONFIG (competences, juryPrompt).
 // ══════════════════════════════════════════════════════════════
 
