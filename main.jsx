@@ -511,9 +511,9 @@ function Root() {
 
     // ── 2. Session existante en cache ──
     const savedId = localStorage.getItem('lumio_sid');
-    if (!savedId) { setPhase('name'); return; }
+    if (!savedId) { window.location.href = 'https://emineo-pac.vercel.app'; return; }
     window.LUMIO_SESSION.load(savedId).then(session => {
-      if (!session || !session.studentName) { setPhase('name'); return; }
+      if (!session || !session.studentName) { window.location.href = 'https://emineo-pac.vercel.app'; return; }
       // Session trouvée — restaurer
       const n = session.studentName;
       setStudentName(n);
@@ -561,9 +561,9 @@ function Root() {
   };
 
   const logout = () => {
-    window.LUMIO_SESSION.save(sessionId, { phase: 'login' });
-    setPhase('login');
-    setShowLogin(true);
+    if (sessionId) window.LUMIO_SESSION.clear(sessionId);
+    localStorage.removeItem('lumio_sid');
+    window.location.href = 'https://emineo-pac.vercel.app';
   };
 
   const resetSession = () => {
@@ -582,10 +582,8 @@ function Root() {
 
   return (
     <>
-      {phase === 'name' && <NameScreen onConfirm={handleNameConfirm} />}
       {phase === 'desktop' && <window.LumioDesktop onLogout={logout} studentName={studentName} timerStart={timerStart} />}
       {phase === 'brief' && <WelcomeBriefCard onClose={dismissBrief} studentName={studentName} />}
-      {showLogin && phase !== 'name' && <LoginScreen onLogin={handleLogin} studentName={studentName} />}
     </>
   );
 }
