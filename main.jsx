@@ -466,6 +466,53 @@ function WelcomeBriefCard({ onClose, studentName }) {
 
 // ─── ROOT ────────────────────────────────────────────────────
 // Lit les URL params transmis par le portail (?p=Prénom&n=Nom&e=email).
+// ══════════════════════════════════════════════════════════════
+//  Portal gate — remplace le NameScreen supprimé.
+//  Pas de formulaire, pas de champs. Juste un lien vers le portail.
+// ══════════════════════════════════════════════════════════════
+function getPortalUrl() {
+  try {
+    var h = window.location.hostname;
+    if (h.indexOf('cdrh') !== -1) return 'https://cdrh-pac.vercel.app';
+    if (h.indexOf('lumio') !== -1) return 'https://msmc-pac.vercel.app';
+    if (h.indexOf('mmd')  !== -1) return 'https://emineo-pac.vercel.app';
+    if (h.indexOf('mdo')  !== -1) return 'https://emineo-pac.vercel.app';
+  } catch (_) {}
+  return 'https://emineo-pac.vercel.app';
+}
+
+function GateScreen() {
+  var cfg = window.PAC_CONFIG || {};
+  var portalUrl = getPortalUrl();
+  return (
+    <div style={{ position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
+                  background:'linear-gradient(135deg,#c9ccd3 0%,#a8b0bc 50%,#c4b8ae 100%)',
+                  fontFamily:'var(--font-sans)' }}>
+      <div style={{ textAlign:'center', maxWidth:420, padding:'40px 32px',
+                    background:'rgba(255,255,255,0.12)', borderRadius:20,
+                    backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+                    border:'1px solid rgba(255,255,255,0.18)' }}>
+        <div style={{ fontFamily:'var(--font-display)', fontSize:28, color:'white', marginBottom:6 }}>
+          Lumio Health
+        </div>
+        <div style={{ fontFamily:'var(--font-mono)', fontSize:10, letterSpacing:'0.15em',
+                      color:'rgba(255,255,255,0.6)', textTransform:'uppercase', marginBottom:24 }}>
+          {cfg.dispositif || 'PAC'} · {(cfg.bloc||'').toUpperCase()}
+        </div>
+        <div style={{ fontSize:14, color:'rgba(255,255,255,0.85)', lineHeight:1.6, marginBottom:28 }}>
+          Connecte-toi via ton portail Éminéo pour accéder à cette affaire.
+        </div>
+        <a href={portalUrl} style={{ display:'inline-block', padding:'12px 32px', borderRadius:10,
+                                     background:'rgba(255,255,255,0.22)', color:'white', fontSize:14,
+                                     fontWeight:600, textDecoration:'none',
+                                     border:'1px solid rgba(255,255,255,0.25)' }}>
+          Accéder au portail →
+        </a>
+      </div>
+    </div>
+  );
+}
+
 // Si les 3 sont présents ET email valide → bypass NameScreen + lockscreen.
 function readPortalParams() {
   try {
@@ -480,7 +527,7 @@ function readPortalParams() {
 }
 
 function Root() {
-  const [phase, setPhase] = useRootState('loading'); // loading | name | login | brief | desktop
+  const [phase, setPhase] = useRootState('loading'); // loading | gate | brief | desktop
   const [studentName, setStudentName] = useRootState('');
   const [showLogin, setShowLogin] = useRootState(false);
   const [sessionId, setSessionId] = useRootState(null);
@@ -511,9 +558,9 @@ function Root() {
 
     // ── 2. Session existante en cache ──
     const savedId = localStorage.getItem('lumio_sid');
-    if (!savedId) { window.location.href = 'https://emineo-pac.vercel.app'; return; }
+    if (!savedId) { setPhase('gate'); return; }
     window.LUMIO_SESSION.load(savedId).then(session => {
-      if (!session || !session.studentName) { window.location.href = 'https://emineo-pac.vercel.app'; return; }
+      if (!session || !session.studentName) { setPhase('gate'); return; }
       // Session trouvée — restaurer
       const n = session.studentName;
       setStudentName(n);
@@ -563,7 +610,7 @@ function Root() {
   const logout = () => {
     if (sessionId) window.LUMIO_SESSION.clear(sessionId);
     localStorage.removeItem('lumio_sid');
-    window.location.href = 'https://emineo-pac.vercel.app';
+    setPhase('gate');
   };
 
   const resetSession = () => {
@@ -582,6 +629,7 @@ function Root() {
 
   return (
     <>
+      {phase === 'gate' && <GateScreen />}
       {phase === 'desktop' && <window.LumioDesktop onLogout={logout} studentName={studentName} timerStart={timerStart} />}
       {phase === 'brief' && <WelcomeBriefCard onClose={dismissBrief} studentName={studentName} />}
     </>
