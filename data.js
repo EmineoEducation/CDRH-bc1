@@ -166,7 +166,36 @@ window.LUMIO_DATA = {
         "channel": "DM"
       }
     ]
-  }
+  },
+  "voiceMemos": [
+    {
+      "title": "Douze recrutements en CDI — on n'a pas la structure pour absorber",
+      "author": "Isabelle Kwan",
+      "role": "Directrice des Ressources Humaines",
+      "date": "10 septembre 2024",
+      "context": "mémo dicté après le CODIR",
+      "durationSec": 52,
+      "transcript": "Théo vient d'annoncer douze recrutements en CDI pour absorber le contrat Northgate. Douze. En parallèle du passage à trois jours de télétravail par semaine. On n'a ni les fiches de poste à jour, ni les contrats types adaptés au nouveau rythme hybride, ni même un process d'onboarding formalisé. Le service RH, c'est moi et une alternante. Si on lance douze recrutements sans structurer en amont, on va créer plus de problèmes qu'on n'en résout. Il faut que quelqu'un pose le cadre juridique du télétravail élargi et la conformité RGPD des dossiers avant de publier la moindre offre."
+    },
+    {
+      "title": "Cas Yassine — burn-out, arrêt prolongé, et anomalie contractuelle",
+      "author": "Isabelle Kwan",
+      "role": "Directrice des Ressources Humaines",
+      "date": "12 septembre 2024",
+      "context": "mémo confidentiel après examen du dossier",
+      "durationSec": 45,
+      "transcript": "J'ai rouvert le dossier de Yassine Morel. Arrêt maladie depuis six semaines pour burn-out diagnostiqué. En relisant son contrat, j'ai trouvé une clause de non-concurrence qui ne mentionne aucune contrepartie financière — c'est juridiquement nul. Et sa fiche de poste date de l'embauche initiale, elle ne correspond plus du tout à ses missions actuelles. Il y a un risque prud'homal si on ne régularise pas avant son retour. Il faut aussi anticiper les conditions de reprise : visite médicale, aménagement éventuel, entretien de réintégration. Rien de tout ça n'est préparé."
+    },
+    {
+      "title": "Révision salariale Camille — il faut traiter ça vite",
+      "author": "Théo Marczak",
+      "role": "CEO Lumio Health",
+      "date": "15 septembre 2024",
+      "context": "mémo dicté après échange informel",
+      "durationSec": 39,
+      "transcript": "Camille m'a intercepté ce matin. Elle demande une révision salariale depuis trois mois et personne ne lui a répondu. Elle porte le développement B2B quasiment seule, elle a ramené Northgate, et elle est toujours sur sa grille d'entrée. Je la comprends. Mais je ne peux pas décider au cas par cas sans une grille de rémunération cohérente pour toute la boîte. On est quarante-deux, bientôt cinquante-quatre — on ne peut plus fonctionner comme une startup de dix. Il faut qu'on structure ça proprement."
+    }
+  ]
 };
 
 window.PAC_CONFIG = {
