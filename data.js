@@ -516,3 +516,680 @@ window.PAC_CONFIG = {
 };
 // Alias de compatibilité (les apps existantes lisent encore PASS_CONFIG)
 window.PASS_CONFIG = window.PAC_CONFIG;
+
+
+// === [Chantier PDF+Browser] dossiers/guide/portraits — 02/07/2026 ===
+// Restructuration de D.documents[]/D.deckBoard/D.yassineVeille (déjà écrits) en
+// D.dossiers[]/D.guide pour app-pdf.jsx. Ajout D.portraits[] (5 personnages
+// universels, fichiers déjà déployés dans /portraits/) + dossier Finder dédié.
+// Aucun contenu narratif nouveau : uniquement restructuration + câblage.
+(function() {
+  var D = window.LUMIO_DATA;
+  if (!D) return;
+  D.dossiers = [
+  {
+    "id": "DOC-01",
+    "title": "Lancement Opération Pulse — votre mission RH prioritaire",
+    "tab": "Lancement Opération Pulse — v…",
+    "accent": "#1b3a6b",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Théo Marczak (CEO)",
+        "title": "Lancement Opération Pulse — votre mission RH prioritaire",
+        "byline": "email · Acte 1",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "{{PRENOM}},"
+          },
+          {
+            "type": "p",
+            "text": "Suite à la signature du contrat Northgate et à la due diligence engagée par Jakob Rein, je vous confie une mission RH d'urgence avec une date butoir au 31 mars 2025."
+          },
+          {
+            "type": "p",
+            "text": "Lumio Health compte aujourd'hui 48 équivalents temps plein. La croissance de ces 18 derniers mois a été rapide, et plusieurs sujets RH ont été gérés dans l'urgence sans respect des procédures légales. Il est temps de corriger ça avant que quelqu'un d'autre ne le fasse à notre place."
+          },
+          {
+            "type": "p",
+            "text": "Votre périmètre d'intervention :"
+          },
+          {
+            "type": "p",
+            "text": "1. CONFORMITÉ CONTRACTUELLE — Audit des contrats de travail en cours, identification des anomalies, propositions d'avenant correctif. Priorité : contrat de Yassine Morel (en arrêt depuis 6 semaines)."
+          },
+          {
+            "type": "p",
+            "text": "2. PAIE — Vérification et correction des bulletins de paie de février 2025 transmis par le cabinet Altas. Des erreurs ont été signalées."
+          },
+          {
+            "type": "p",
+            "text": "3. TÉLÉTRAVAIL — Rédaction d'une charte télétravail conforme à la législation, préalablement à la mise en place prévue le 1er avril. À valider avec les instances représentatives (ou à défaut avec les salariés si pas de CSE constitué)."
+          },
+          {
+            "type": "p",
+            "text": "4. ÉGALITÉ F/H — Traitement de la demande de Camille Ott (cf. email joint) et préconisation sur la politique de rémunération."
+          },
+          {
+            "type": "p",
+            "text": "5. VEILLE JURIDIQUE — Note de synthèse sur les obligations RH activées par notre taille actuelle et les prochains seuils à anticiper."
+          },
+          {
+            "type": "p",
+            "text": "Je reste disponible pour échanger. Merci de me tenir informé de vos avancées chaque mercredi."
+          },
+          {
+            "type": "p",
+            "text": "— Théo Marczak\nCEO Lumio Health"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-02",
+    "title": "Situation de mon équipe — tensions et surcharges à traiter d'urgence",
+    "tab": "Situation de mon équipe — ten…",
+    "accent": "#c4420f",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Sonia Ferracci (DirMkt)",
+        "title": "Situation de mon équipe — tensions et surcharges à traiter d'urgence",
+        "byline": "note interne · Acte 1",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "À : Mission RH externe\nDe : Sonia Ferracci, Directrice Marketing\nDate : 11 mars 2025"
+          },
+          {
+            "type": "p",
+            "text": "Bonjour,"
+          },
+          {
+            "type": "p",
+            "text": "Je vous transmets la situation de mon équipe telle que je la vis, avant que vous ne plongiez dans les documents officiels."
+          },
+          {
+            "type": "p",
+            "text": "Yassine est en arrêt depuis le 28 janvier. Le diagnostic est burn-out. Je ne l'ai pas vu venir aussi vite — il gérait seul la production de contenu pour le lancement Northgate, et je n'ai pas suffisamment découpé la charge. Humainement, ça va, il m'a écrit une fois. Juridiquement, je ne sais pas ce qu'on doit faire : son contrat est signé, son arrêt est en cours, mais on a besoin de son accès aux outils pour continuer à travailler. Est-ce qu'on peut accéder à ses fichiers ? Est-ce qu'on peut le contacter ? Je n'ai aucune réponse à ça."
+          },
+          {
+            "type": "p",
+            "text": "Camille, de son côté, est épuisée. Elle porte depuis 3 mois le double de son périmètre normal (B2B + support avant-vente Northgate) sans compensation. Elle m'a montré sa fiche de paie comparée à Marc — l'écart est réel. Je ne peux pas lui promettre quoi que ce soit, mais je refuse de faire comme si de rien n'était."
+          },
+          {
+            "type": "p",
+            "text": "Sur la question du télétravail : Théo a annoncé le passage à 3 jours en CODIR sans m'en parler au préalable. Mon équipe attend une réponse concrète sur les modalités. Je n'ai rien à leur dire pour l'instant."
+          },
+          {
+            "type": "p",
+            "text": "J'ai besoin d'un interlocuteur RH qui sache quoi faire. Merci d'avance."
+          },
+          {
+            "type": "p",
+            "text": "— Sonia Ferracci"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-03",
+    "title": "Contrat de travail CDI — Yassine Morel, Content Manager",
+    "tab": "Contrat de travail CDI — Yass…",
+    "accent": "#0a7a6e",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Service RH Lumio Health",
+        "title": "Contrat de travail CDI — Yassine Morel, Content Manager",
+        "byline": "contrat de travail · Acte 2",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE"
+          },
+          {
+            "type": "p",
+            "text": "Lumio Health SAS — 23 rue de la Roquette, 75011 Paris"
+          },
+          {
+            "type": "h3",
+            "text": "ENTRE LES SOUSSIGNÉS :"
+          },
+          {
+            "type": "p",
+            "text": "Lumio Health SAS, représentée par Théo Marczak, CEO\nET : Yassine Morel, né le 14 avril 1996 à Lyon"
+          },
+          {
+            "type": "h3",
+            "text": "ARTICLE 1 — POSTE ET MISSIONS"
+          },
+          {
+            "type": "p",
+            "text": "Yassine Morel est engagé en qualité de Content Manager, cadre niveau 2. Il est rattaché à la Direction Marketing. Ses missions incluent : production de contenus éditoriaux (blog, réseaux sociaux, newsletter), coordination avec les prestataires créatifs externes, veille concurrentielle."
+          },
+          {
+            "type": "h3",
+            "text": "ARTICLE 2 — DATE D'ENTRÉE EN FONCTION"
+          },
+          {
+            "type": "p",
+            "text": "Le contrat prend effet au 1er septembre 2023. La période d'essai est fixée à 6 mois, renouvelable une fois.\n[⚠ ANOMALIE : pour un cadre, la période d'essai est de 4 mois maximum, renouvelable une fois — soit 8 mois au total. 6 mois de période initiale est non conforme au Code du travail.]"
+          },
+          {
+            "type": "h3",
+            "text": "ARTICLE 3 — RÉMUNÉRATION"
+          },
+          {
+            "type": "p",
+            "text": "Rémunération brute mensuelle : 3 200 €. Prime variable annuelle non contractualisée, à la discrétion du CEO."
+          },
+          {
+            "type": "h3",
+            "text": "ARTICLE 4 — DURÉE DU TRAVAIL"
+          },
+          {
+            "type": "p",
+            "text": "Temps plein, 35h/semaine. Horaires variables selon les besoins de l'activité."
+          },
+          {
+            "type": "h3",
+            "text": "ARTICLE 5 — LIEU DE TRAVAIL"
+          },
+          {
+            "type": "p",
+            "text": "Siège social Lumio Health, Paris 11e. Des déplacements ponctuels peuvent être requis."
+          },
+          {
+            "type": "p",
+            "text": "[⚠ ANOMALIE : Absence de mention de la convention collective applicable — la CCN Syntec (IDCC 1486) s'applique au secteur medtech/digital. Son omission est sanctionnable.]\n[⚠ ANOMALIE RGPD : Aucune mention de la durée de conservation des données personnelles du salarié, ni de ses droits d'accès et de rectification — manquement à l'article 13 du RGPD.]\n[⚠ ANOMALIE : Absence de clause de confidentialité sur les données clients, les brevets et les informations stratégiques de Lumio Health — risque juridique majeur compte tenu de l'accès de Yassine aux données marketing."
+          },
+          {
+            "type": "p",
+            "text": "Fait à Paris, le 25 août 2023\nSigné : Théo Marczak / Yassine Morel"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-04",
+    "title": "Planning équipe Marketing & B2B — semaines 10 à 14 / 2025",
+    "tab": "Planning équipe Marketing & B…",
+    "accent": "#5c2d8f",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "SIRH Lumio Health (export automatique)",
+        "title": "Planning équipe Marketing & B2B — semaines 10 à 14 / 2025",
+        "byline": "planning · Acte 2",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "EXPORT SIRH — Planning équipe Marketing & B2B\nSemaines 10 à 14 / 2025 (3 mars au 4 avril 2025)\nGénéré le 14 mars 2025 — Lucca HR"
+          },
+          {
+            "type": "h3",
+            "text": "SOMMARY ÉQUIPE :"
+          },
+          {
+            "type": "p",
+            "text": "• Yassine Morel — Content Manager — EN ARRÊT MALADIE depuis le 28/01/2025\nMotif déclaré : syndrome d'épuisement professionnel\nDernier jour travaillé : 27/01/2025\nStatut remplacement : non pourvu"
+          },
+          {
+            "type": "p",
+            "text": "• Camille Ott — Responsable Partenariats B2B\nSemaine 10 : 52h déclarées (dont 18h de déplacement client)\nSemaine 11 : 49h déclarées (présentation Northgate jeudi)\nSemaine 12 : 50h (support avant-vente + relance portefeuille)\nTélétravail : mardis et jeudis en pratique — non formalisé dans le SIRH\nNote manager : \"Camille est en surcharge depuis début février, elle ne signale pas mais les horaires parlent.\""
+          },
+          {
+            "type": "p",
+            "text": "• Marc Lefebvre — Lead Developer (poste adjacent, rattaché produit)\nSemaines 10-14 : 37h-39h stables\nTélétravail : 2 jours/semaine, accord informel avec Théo\n[⚠ ANOMALIE : télétravail non encadré par charte ni accord collectif pour l'ensemble de l'équipe]"
+          },
+          {
+            "type": "p",
+            "text": "NOTE SYSTÈME : 7 collaborateurs sur 14 dans ce département indiquent des jours de télétravail non formalisés dans le SIRH. La fonctionnalité \"Télétravail\" du module Lucca n'a pas été activée faute de politique RH formalisée."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-05",
+    "title": "Bulletins de paie février 2025 — Yassine Morel, Camille Ott, Jakob Rein (extrait)",
+    "tab": "Bulletins de paie février 202…",
+    "accent": "#7a3b46",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Cabinet Paie Externe — Fiduciaire Altas",
+        "title": "Bulletins de paie février 2025 — Yassine Morel, Camille Ott, Jakob Rein (extrait)",
+        "byline": "bulletins de paie · Acte 3",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "BULLETINS DE PAIE — FÉVRIER 2025"
+          },
+          {
+            "type": "p",
+            "text": "Cabinet Fiduciaire Altas — Référence dossier LH-2025-02"
+          },
+          {
+            "type": "h3",
+            "text": "BULLETIN 1 : YASSINE MOREL"
+          },
+          {
+            "type": "p",
+            "text": "Salaire brut mensuel contractuel : 3 200 €\nArrêt maladie à compter du 28/01/2025 (35 jours au 28/02)\nIJSS CPAM estimées par Altas : 48,50 €/jour × 35 jours = 1 697,50 €\nMaintien de salaire appliqué par Altas : 60 % du salaire brut = 1 920 €\nMontant net versé : 1 920 € - 1 697,50 € = 222,50 €\n[⚠ ERREUR : La CCN Syntec (applicable à Lumio) prévoit un maintien à 100 % du salaire brut pendant 90 jours pour les cadres (après 1 an d'ancienneté). Yassine a 18 mois d'ancienneté. Maintien correct = 3 200 € - IJSS = 1 502,50 € nets dus supplémentaires à régulariser.]"
+          },
+          {
+            "type": "h3",
+            "text": "BULLETIN 2 : CAMILLE OTT"
+          },
+          {
+            "type": "p",
+            "text": "Salaire brut : 3 680 €\nFrais professionnels déplacements déc. 2024 – fév. 2025 : 847 € (notes de frais transmises le 28 fév.)\nFrais intégrés dans le bulletin : 0 €\n[⚠ ERREUR : Les notes de frais transmises dans les délais doivent être remboursées sur le bulletin du mois de transmission. Omission Altas = 847 € de frais non remboursés à régulariser.]"
+          },
+          {
+            "type": "h3",
+            "text": "BULLETIN 3 : JAKOB REIN (Consultant externe, convention de mise à disposition)"
+          },
+          {
+            "type": "p",
+            "text": "Honoraires bruts : 6 000 €\nCotisations patronales appliquées : taux salarié (22 %) au lieu du taux patronal (45 %)\nDifférence de cotisation : 1 380 € sous-déclarés\n[⚠ ERREUR : Confusion taux salarié/patronal — erreur de paramétrage URSSAF à corriger sur mars. Risque de redressement URSSAF si non régularisé.]"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-06",
+    "title": "Demande formelle de révision salariale — écart constaté avec collègues",
+    "tab": "Demande formelle de révision …",
+    "accent": "#1a6641",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Camille Ott (B2B Manager)",
+        "title": "Demande formelle de révision salariale — écart constaté avec collègues",
+        "byline": "email · Acte 3",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "De : Camille Ott\nÀ : Théo Marczak — CEO\nCC : Mission RH externe\nDate : 13 mars 2025\nObjet : Demande formelle de révision salariale — Écart de rémunération non justifié"
+          },
+          {
+            "type": "p",
+            "text": "Théo,"
+          },
+          {
+            "type": "p",
+            "text": "Je t'adresse cette demande par écrit après que notre conversation de janvier n'a pas eu de suite."
+          },
+          {
+            "type": "p",
+            "text": "J'ai effectué une comparaison de rémunération sur la base des fiches de poste et des informations disponibles en interne. Voici ce que j'observe :"
+          },
+          {
+            "type": "ul",
+            "items": [
+              "Poste A (anonymisé, sexe M, ancienneté 16 mois) : 3 978 €/mois brut · périmètre : 8 comptes clients, management 0",
+              "Poste B (anonymisé, sexe M, ancienneté 22 mois) : 3 850 €/mois brut · périmètre : 6 comptes clients, management 0",
+              "Mon poste (Camille Ott, sexe F, ancienneté 48 mois) : 3 680 €/mois brut · périmètre : 180 comptes clients, management 1 alternant"
+            ]
+          },
+          {
+            "type": "p",
+            "text": "L'écart avec le poste A est de 8,1 %. L'écart avec le poste B est de 4,6 %."
+          },
+          {
+            "type": "p",
+            "text": "Je n'ai pas de raison professionnelle valide pour expliquer ces écarts — ni en termes de formation, ni d'ancienneté, ni de résultats mesurables (j'ai signé 3 des 5 grands comptes 2024). Je te demande une réponse formelle sous 30 jours, précisant soit les éléments objectifs qui justifient l'écart, soit un calendrier de réévaluation."
+          },
+          {
+            "type": "p",
+            "text": "Si je n'ai pas de réponse dans ce délai, je consulterai un avocat spécialisé en droit du travail."
+          },
+          {
+            "type": "p",
+            "text": "Ce courrier est conservé."
+          },
+          {
+            "type": "p",
+            "text": "— Camille Ott"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-07",
+    "title": "CODIR du 10 mars 2025 — décision de déploiement du télétravail étendu",
+    "tab": "CODIR du 10 mars 2025 — décis…",
+    "accent": "#2d6a4f",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Théo Marczak (CEO) — compte-rendu rédigé par l'assistante de direction",
+        "title": "CODIR du 10 mars 2025 — décision de déploiement du télétravail étendu",
+        "byline": "compte-rendu de réunion · Acte 4",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "COMPTE RENDU DE CODIR"
+          },
+          {
+            "type": "p",
+            "text": "Date : 10 mars 2025 · 09h00–10h30\nParticipants : Théo Marczak (CEO), Sonia Ferracci (DirMkt), Marc Lefebvre (Lead Dev), Aline Dupuis (CFO)\nAbsents excusés : Camille Ott (déplacement client)\nRédigé par : Nadia Benhacène (assistante de direction)"
+          },
+          {
+            "type": "h3",
+            "text": "ORDRE DU JOUR"
+          },
+          {
+            "type": "p",
+            "text": "1. Point Northgate — due diligence en cours\n2. Organisation du travail — télétravail\n3. Recrutements Q2"
+          },
+          {
+            "type": "h3",
+            "text": "POINT 1 — NORTHGATE"
+          },
+          {
+            "type": "p",
+            "text": "Jakob Rein a confirmé la due diligence pour le 31 mars. Dossier RH attendu. Théo Marczak précise que la mission RH externe est lancée."
+          },
+          {
+            "type": "h3",
+            "text": "POINT 2 — TÉLÉTRAVAIL"
+          },
+          {
+            "type": "p",
+            "text": "Théo Marczak annonce le passage au télétravail 3 jours/semaine pour l'ensemble des salariés à compter du 1er avril 2025. Marc Lefebvre demande si une charte sera rédigée. Théo répond : \"On fera ça dans la foulée.\"\n[⚠ ANOMALIE LÉGALE : Selon l'ANI Télétravail du 26 novembre 2020 et les articles L1222-9 et suivants du Code du travail, le déploiement du télétravail régulier suppose un accord collectif ou une charte élaborée après avis du CSE (ou des salariés en l'absence de CSE). Aucune consultation n'est mentionnée dans ce CR. L'absence de charte au 1er avril exposerait Lumio à une mise en cause en cas d'accident au domicile d'un salarié.]"
+          },
+          {
+            "type": "h3",
+            "text": "POINT 3 — RECRUTEMENTS Q2"
+          },
+          {
+            "type": "p",
+            "text": "Validation de 3 postes : Lead Dev iOS, Growth Manager, Data Scientist Santé. Profils à finaliser avec RH externe."
+          },
+          {
+            "type": "h3",
+            "text": "ACTIONS"
+          },
+          {
+            "type": "ul",
+            "items": [
+              "Mission RH externe : produire dossier conformité avant 31 mars ✓",
+              "CFO : vérifier budget recrutement ✓"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "DOC-08",
+    "title": "Tableau de bord RH — données Q4 2024 (incomplet)",
+    "tab": "Tableau de bord RH — données …",
+    "accent": "#a0522d",
+    "warning": false,
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "Service RH Lumio Health",
+        "title": "Tableau de bord RH — données Q4 2024 (incomplet)",
+        "byline": "tableau de bord RH partiel · Acte 5",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "TABLEAU DE BORD RH — LUMIO HEALTH"
+          },
+          {
+            "type": "p",
+            "text": "Données Q4 2024 · Généré le 14 mars 2025 · Statut : INCOMPLET"
+          },
+          {
+            "type": "h3",
+            "text": "INDICATEURS RENSEIGNÉS"
+          },
+          {
+            "type": "ul",
+            "items": [
+              "Effectif total ETP : 48",
+              "Recrutements Q4 2024 : 9 (dont 6 CDI, 2 CDD, 1 alternance)",
+              "Masse salariale brute mensuelle : 198 400 €"
+            ]
+          },
+          {
+            "type": "p",
+            "text": "INDICATEURS MANQUANTS OU ERRONÉS [à compléter ou corriger]\n• Taux d'absentéisme : [VIDE] — Nb jours d'absence / (Nb salariés × Nb jours ouvrés) × 100\n• Taux de turn-over : [VIDE] — (Départs + Arrivées / 2) / Effectif moyen × 100\n• Coût moyen de recrutement : [VIDE]\n• Index égalité professionnelle F/H : [VIDE] — obligatoire dès 50 ETP\n• Nombre de jours de formation : [VIDE]\n• Taux de réalisation du plan de formation : [VIDE]\n• Accidents du travail : 0 déclarés — [⚠ À VÉRIFIER : télétravail non formalisé crée un angle mort]\n• Nombre de salariés en situation de handicap (RQTH) : [VIDE] — obligation AGEFIPH dès 20 ETP (Lumio dépasse largement ce seuil)\n• Délai moyen de recrutement : estimé 42 jours — [⚠ SOURCE NON DOCUMENTÉE, à vérifier sur Lucca]\n• Satisfaction collaborateurs (baromètre) : [AUCUN BAROMÈTRE RÉALISÉ EN 2024]"
+          },
+          {
+            "type": "p",
+            "text": "NOTE DU SERVICE RH : Le tableau de bord n'a pas été mis à jour depuis le T3 2024. L'outil SIRH Lucca contient les données brutes mais le module reporting n'a pas été paramétré. Recommandation : prioriser le paramétrage du dashboard Lucca et la définition d'un cycle de reporting mensuel."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "deck-board",
+    "title": "Plan RH Lumio Health — Mise en conformité et sécurisation post-Northgate",
+    "tab": "Présentation CODIR",
+    "accent": "#1b3a6b",
+    "type": "deck",
+    "subtitle": "Présentation",
+    "slides": [
+      {
+        "titre": "Contexte",
+        "contenu": "Lumio Health : 48 ETP, croissance +60 % en 18 mois, contrat Northgate signé mars 2025. Due diligence RH exigée avant déblocage financement (31 mars deadline)."
+      },
+      {
+        "titre": "Diagnostic synthétique (4 chantiers)",
+        "contenu": "1. Conformité contractuelle — contrat Yassine Morel non conforme (RGPD, CC, confidentialité)\n2. Paie — bulletins février erronés (IJSS, frais pro, cotisations)\n3. Égalité F/H — écart salarial 8 % Camille Ott / Marc Lefebvre (poste comparable)\n4. Télétravail — déploiement 3j/semaine prévu 1er avril sans consultation CSE ni charte formalisée"
+      },
+      {
+        "titre": "Plan d'action priorisé",
+        "contenu": "Semaine 1 (14-20 mars) : audit contrats, correction bulletins de paie, mise en demande Altas\nSemaine 2 (21-27 mars) : proposition avenant Yassine, plan de rattrapage salarial Camille, rédaction charte télétravail\nSemaine 3 (28-31 mars) : dossier de conformité RH complet pour Jakob Rein"
+      },
+      {
+        "titre": "Risques juridiques si aucune action",
+        "contenu": "• Non-conformité RGPD : amende CNIL jusqu'à 4 % du CA\n• Prud'hommes Camille : risque condamnation + dommages-intérêts\n• Absence charte télétravail : responsabilité employeur en cas d'accident au domicile\n• Déploiement télétravail sans consultation : annulation possible de la décision par le juge"
+      }
+    ]
+  },
+  {
+    "id": "veille",
+    "title": "Veille concurrentielle",
+    "tab": "Veille concurrentielle",
+    "accent": "#1a6641",
+    "type": "rich",
+    "pages": [
+      {
+        "kicker": "14 mars 2025",
+        "title": "Veille concurrentielle",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Veille juridique RH — Mars 2025\nPérimètre : droit du travail, RGPD RH, égalité professionnelle\nSource : service-public.fr, Légifrance, CNIL, circulaires DGT"
+          },
+          {
+            "type": "h3",
+            "text": "LOI SANTÉ AU TRAVAIL 2021 (entrée en vigueur progressive 2022-2025)"
+          },
+          {
+            "type": "p",
+            "text": "Obligation de prévention renforcée des risques psychosociaux. Le DUERP (Document Unique d'Évaluation des Risques Professionnels) doit désormais inclure un volet RPS spécifique mis à jour chaque année. Lumio Health : DUERP existant mais non mis à jour depuis 14 mois. ⚠ Non-conformité."
+          },
+          {
+            "type": "h3",
+            "text": "TÉLÉTRAVAIL (ANI 2020, transposé en droit positif)"
+          },
+          {
+            "type": "p",
+            "text": "Déploiement du télétravail régulier obligatoirement encadré par accord collectif ou charte unilatérale après consultation du CSE (ou avis des salariés si pas de CSE). L'employeur doit préciser : jours éligibles, équipement fourni, prise en charge des frais, droit à la déconnexion. Absence de charte = obligation reste théorique mais expose à responsabilité en cas d'accident."
+          },
+          {
+            "type": "h3",
+            "text": "INDEX ÉGALITÉ PROFESSIONNELLE"
+          },
+          {
+            "type": "p",
+            "text": "Entrée dans le champ d'obligation à 50 ETP. Lumio atteindra 50 ETP en avril. Calcul de l'index à prévoir pour la publication obligatoire avant le 1er mars 2026 (données 2025). Comporte 4 indicateurs dont écart de rémunération F/H."
+          },
+          {
+            "type": "h3",
+            "text": "RGPD ET DONNÉES RH"
+          },
+          {
+            "type": "p",
+            "text": "Les données des salariés (bulletins de paie, contrats, absences, données médicales) constituent des données personnelles. Obligations : information des salariés, durée de conservation définie, sécurisation des accès, registre des traitements à jour. Cas Yassine Morel : contrat sans mention durée de conservation → manquement article 13 RGPD."
+          },
+          {
+            "type": "h3",
+            "text": "MAINTIEN DE SALAIRE (IJSS)"
+          },
+          {
+            "type": "p",
+            "text": "En cas d'arrêt maladie, maintien de salaire par l'employeur calculé sur la rémunération brute avec déduction des IJSS versées par la CPAM. Méthode de calcul définie par la convention collective applicable. Erreur de calcul = salaire brut sous-évalué ou sur-évalué selon cas. Prescription : 3 ans pour réclamation salarié."
+          }
+        ]
+      }
+    ]
+  }
+];
+  D.guide = {
+  "tips": [
+    {
+      "day": "Acte 1",
+      "title": "Lancement Opération Pulse — votre mission RH prio…",
+      "body": "Lettre de mission officielle adressée au/à la candidat(e) RH. Théo Marczak détaille les enjeux de la croissance post-contrat Northgate, liste les chantiers RH urgents (recrutements, télétravail, conformité) et fixe une deadline au 31 mars 2025."
+    },
+    {
+      "day": "Acte 1",
+      "title": "Situation de mon équipe — tensions et surcharges …",
+      "body": "Sonia alerte sur l'absence prolongée de Yassine Morel, la montée en charge liée au contrat Northgate et la demande de révision salariale de Camille Ott. Elle mentionne ne pas savoir comment gérer la situation RH de Yassine et demande un accompagnement."
+    },
+    {
+      "day": "Acte 2",
+      "title": "Contrat de travail CDI — Yassine Morel, Content M…",
+      "body": "Contrat de travail de Yassine Morel comportant volontairement plusieurs anomalies : absence de mention de la convention collective applicable, clause de confidentialité manquante, durée de conservation des données personnelles non précisée (manquement RGPD), période d'essai non conforme. Sert de base à la compétence 1.3."
+    },
+    {
+      "day": "Acte 2",
+      "title": "Planning équipe Marketing & B2B — semaines 10 à 1…",
+      "body": "Planning hebdomadaire des collaborateurs du département Marketing et B2B montrant la surcharge de Camille Ott (50h/semaine), l'absence de Yassine Morel depuis 6 semaines et des plages télétravail non formalisées. Utilisé pour la compétence 1.4."
+    },
+    {
+      "day": "Acte 3",
+      "title": "Bulletins de paie février 2025 — Yassine Morel, C…",
+      "body": "Trois bulletins de paie comportant des erreurs identifiables : IJSS mal calculées pour Yassine Morel (maintien de salaire sous-évalué), frais professionnels de Camille Ott non intégrés, cotisations patronales erronées pour Jakob Rein. Sert de base à la compétence 1.6."
+    },
+    {
+      "day": "Acte 3",
+      "title": "Demande formelle de révision salariale — écart co…",
+      "body": "Camille Ott signale formellement un écart de rémunération de 8% avec deux collègues masculins occupant des postes équivalents. Elle joint un tableau comparatif anonymisé et mentionne envisager de saisir les prud'hommes si aucune action n'est prise dans les 30 jours. Active les compétences 1.7 et 1.11."
+    },
+    {
+      "day": "Acte 4",
+      "title": "CODIR du 10 mars 2025 — décision de déploiement d…",
+      "body": "Compte-rendu du CODIR actant la décision de déployer le télétravail 3 jours/semaine dès le 1er avril 2025, sans mention de la consultation du CSE ni de la charte télétravail. Sert d'élément déclencheur pour la compétence 1.5 et permet au candidat d'identifier un manquement légal majeur."
+    },
+    {
+      "day": "Acte 5",
+      "title": "Tableau de bord RH — données Q4 2024 (incomplet)",
+      "body": "Tableau de bord RH lacunaire : seuls 3 indicateurs sont renseignés (effectif total, nombre de recrutements, coût de la masse salariale brute), plusieurs cellules sont vides ou erronées. Le candidat doit compléter, corriger et enrichir ce tableau pour répondre aux compétences 1.8 et 1.9."
+    }
+  ]
+};
+  D.portraits = [
+  {
+    "key": "theo_marczak",
+    "title": "Théo Marczak",
+    "file": "portraits/portrait_theo_marczak.html"
+  },
+  {
+    "key": "sonia_ferracci",
+    "title": "Sonia Ferracci",
+    "file": "portraits/portrait_sonia_ferracci.html"
+  },
+  {
+    "key": "camille_ott",
+    "title": "Camille Ott",
+    "file": "portraits/portrait_camille_ott.html"
+  },
+  {
+    "key": "jakob_rein",
+    "title": "Jakob Rein",
+    "file": "portraits/portrait_jakob_rein.html"
+  },
+  {
+    "key": "yassine_morel",
+    "title": "Yassine Morel",
+    "file": "portraits/portrait_yassine_morel.html"
+  }
+];
+  D.finder = D.finder || { folders: {}, order: [] };
+  D.finder.folders.portraits = {
+  "title": "Portraits",
+  "sidebar": "👥 Portraits",
+  "icon": "👥",
+  "items": [
+    {
+      "kind": "portrait",
+      "name": "Théo Marczak",
+      "app": "browser",
+      "props": {
+        "openPortrait": "theo_marczak"
+      }
+    },
+    {
+      "kind": "portrait",
+      "name": "Sonia Ferracci",
+      "app": "browser",
+      "props": {
+        "openPortrait": "sonia_ferracci"
+      }
+    },
+    {
+      "kind": "portrait",
+      "name": "Camille Ott",
+      "app": "browser",
+      "props": {
+        "openPortrait": "camille_ott"
+      }
+    },
+    {
+      "kind": "portrait",
+      "name": "Jakob Rein",
+      "app": "browser",
+      "props": {
+        "openPortrait": "jakob_rein"
+      }
+    },
+    {
+      "kind": "portrait",
+      "name": "Yassine Morel",
+      "app": "browser",
+      "props": {
+        "openPortrait": "yassine_morel"
+      }
+    }
+  ]
+};
+  if (D.finder.order.indexOf('portraits') === -1) {
+    var gIdx = D.finder.order.indexOf('guide');
+    D.finder.order.splice(gIdx >= 0 ? gIdx + 1 : 0, 0, 'portraits');
+  }
+})();
+// === [Chantier PDF+Browser] fin ===
