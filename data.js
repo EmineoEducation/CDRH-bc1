@@ -152,7 +152,7 @@ window.LUMIO_DATA = {
   "slackMessages": {
     "initial": [
       {
-        "from": "Théo Marczak",
+        "from": "Isabelle Kwan",
         "time": "08:32",
         "text": "{{PRENOM}} — Remettre en conformité l'administration du personnel, structurer la politique de télétravail, corriger les bulletins de paie erronés, proposer un plan d'action RH pour accompagner la montée en charge et prévenir les risques juridiques et humains liés à la croissance rapide de Lumio Health.",
         "read": true
@@ -160,7 +160,7 @@ window.LUMIO_DATA = {
     ],
     "delayed": [
       {
-        "from": "Théo Marczak",
+        "from": "Isabelle Kwan",
         "time": "+15min",
         "text": "{{PRENOM}}, dès que tu as une hypothèse solide, envoie-la moi ici.",
         "channel": "DM"
@@ -247,7 +247,7 @@ window.PAC_CONFIG = {
   "titre": "Gérer l'administration du personnel et la fonction RH",
   "epreuve": "Épreuve individuelle écrite - Étude de cas et Épreuve collective écrite avec présentation orale individuelle - Mise en situation professionnelle",
   "deadline": "14 mars 2025 · 18h00",
-  "commanditaire": "Théo Marczak",
+  "commanditaire": "Isabelle Kwan",
   "dispositif": "PAC",
   "note_reflexive": false,
   "temps": [
