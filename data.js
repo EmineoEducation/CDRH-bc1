@@ -196,6 +196,30 @@ window.LUMIO_DATA = {
       "transcript": "Camille m'a intercepté ce matin. Elle demande une révision salariale depuis trois mois et personne ne lui a répondu. Elle porte le développement B2B quasiment seule, elle a ramené Northgate, et elle est toujours sur sa grille d'entrée. Je la comprends. Mais je ne peux pas décider au cas par cas sans une grille de rémunération cohérente pour toute la boîte. On est quarante-deux, bientôt cinquante-quatre — on ne peut plus fonctionner comme une startup de dix. Il faut qu'on structure ça proprement."
     }
   ]
+,
+  "finder": {
+    "folders": {
+      "guide": {
+        "title": "Guide de mission",
+        "sidebar": "⌘ Guide",
+        "icon": "📕",
+        "items": [
+          { "kind": "mail", "name": "Brief de mission", "app": "mail", "props": { "openId": "brief" } }
+        ]
+      },
+      "espace": {
+        "title": "Espace de travail",
+        "sidebar": "Espace de travail",
+        "icon": "📁",
+        "items": [
+          { "kind": "mail", "name": "Boîte mail", "app": "mail", "props": {} },
+          { "kind": "note", "name": "Notes", "app": "notes", "props": {} },
+          { "kind": "audio", "name": "Mémos vocaux", "app": "voice", "props": {} }
+        ]
+      }
+    },
+    "order": ["guide", "espace"]
+  }
 };
 
 window.PAC_CONFIG = {
