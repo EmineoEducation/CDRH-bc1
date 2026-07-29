@@ -232,14 +232,16 @@ function LivrableApp() {
         "</div></div>";
       const resp = await fetch("/api/send-portfolio", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ to: stu.email, studentName: stu.name, bloc: cfg.bloc, html,
-          campus: stu.campus || "" })
+        body: JSON.stringify({ email: stu.email, studentName: stu.name, portfolioHTML: html,
+          bloc: cfg.bloc, campus: stu.campus || "" })
       });
       const result = await resp.json().catch(() => ({}));
       if (!resp.ok && !result.completed) throw new Error("erreur " + resp.status);
       setSent(result.sent === false
         ? "✓ Production validée. (Email temporairement indisponible)"
-        : "✓ Portfolio envoyé à " + stu.email);
+        : result.campusResolved === false
+          ? "✓ Portfolio bien transmis à " + stu.email + ". Un rattachement à votre référent pédagogique sera effectué manuellement."
+          : "✓ Portfolio envoyé à " + stu.email);
     } catch (e) { setSent("Échec de l'envoi (" + e.message + ")."); }
   };
 

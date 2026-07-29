@@ -37,7 +37,9 @@ Local session/identity shortcut: the app **redirects to the portal** if there is
 `http://localhost:3000/?p=Prenom&n=Nom&e=test@example.com`.
 
 Required Vercel env vars: `ANTHROPIC_API_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`,
-`RESEND_API_KEY`, optional `PORTFOLIO_FROM`.
+`RESEND_API_KEY`, optional `PORTFOLIO_FROM`, optional `PAC_FALLBACK_EMAIL` (CC'd on the portfolio
+email whenever the student's campus can't be resolved to a référent pédagogique — see
+*Portfolio-send chain* below).
 
 ## Architecture
 
@@ -151,17 +153,28 @@ else `emineo-pac`) and is where the app redirects on logout or a missing session
 `NameScreen` / `LoginScreen` in `main.jsx` are the pre-portal fallback path — reachable only when there
 are no portal params *and* a session exists in Redis without `fromPortal`.
 
-## Known defects in the portfolio-send chain
+## Portfolio-send chain
 
 `PAC-Emineo-retour-technique.md` (untracked, at repo root) is a black-box production audit of the whole
-PAC fleet; the current branch is `corrections-audit`. Two of its findings are confirmed in this code and
-are worth knowing before touching that chain:
+PAC fleet; two of its findings applied to this repo and are now fixed (branch `corrections-audit`):
 
-1. **Payload contract mismatch.** `app-livrable.jsx:236` posts `{ to, studentName, bloc, html, campus }`, but `api/send-portfolio.js` reads `{ email, portfolioHTML }` — both arrive `undefined`, so the handler returns 400 and no portfolio is ever sent.
-2. **Campus never read.** `readPortalParams()` reads `p`/`n`/`e` but not `c`, and nothing else sets `student.campus`, so `campus` is always `""` and the campus RP CC list can never resolve.
+1. **Payload contract.** `app-livrable.jsx`'s `sendPortfolio()` posts `{ email, studentName, portfolioHTML, bloc, campus }` — matching what `api/send-portfolio.js` destructures. (It used to post `{ to, html }`, which the handler couldn't read, so the portfolio was never actually sent.)
+2. **Campus threading.** `readPortalParams()` (`main.jsx`) reads `c` from the portal URL, normalizes it (`normalizeCampus()`: lowercase, accents stripped, internal whitespace collapsed — the RP registry uses space-separated ids like `le mans`, `la rochelle`) and threads it through `applyStudent()` → `window.LUMIO_SESSION` (`studentCampus`) → `LUMIO_DATA.student.campus`, so it reaches the send-portfolio payload. The fallback `NameScreen` path (no portal params) has no campus source and leaves it empty — that path is already the deprecated/marginal one per the identity chain above.
 
-Fixing these means matching the client payload to the handler and threading `c` through
-`readPortalParams` → session → `LUMIO_DATA.student.campus`. Validate with a real end-to-end send.
+`api/send-portfolio.js` never sends silently without an institutional recipient, but it also never
+blocks the student's own delivery:
+- `normalizeCampus()` (a second, byte-identical copy — no module system across the browser/serverless
+  boundary) is applied both when building `campusRPMap` from the hub and when resolving the incoming
+  `campus`, so casing/accent/whitespace variants match the registry.
+- If campus resolution fails (empty or not found in the hub/`CAMPUS_RP_FALLBACK`), the email still goes
+  to the student; the CC falls back to `PAC_FALLBACK_EMAIL` (if configured) instead of an empty CC list,
+  and the response includes `campusResolved: false` so the client can show a plain, non-alarming notice
+  ("your work was received, a référent will be attached manually").
+  Note `CAMPUS_RP_FALLBACK` itself is missing a `la rochelle` entry — the hub is the source of truth for
+  it, so `PAC_FALLBACK_EMAIL` is what covers a hub outage for that campus until the hub adds it.
+- Every unresolved case is logged for manual follow-up: `console.warn` plus a best-effort `RPUSH` to
+  Upstash Redis key `cdrh:bc1:campus-incidents` (command sent in the POST body as
+  `["RPUSH", key, value]`, never in the URL, since the incident contains the student's email/name).
 
 ## Other things worth knowing
 

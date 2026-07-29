@@ -10,6 +10,24 @@ import { createHash } from 'crypto';
 const PORTAIL_URL = 'https://cdrh-pac.vercel.app/api/progress';
 const BLOC_ID     = 'bc1';
 
+// Adresse de repli mise en copie quand le campus n'est pas résolu (vide ou absent du
+// registre) — garantit qu'un portfolio n'est jamais produit sans destinataire
+// institutionnel. Optionnelle : si absente, aucune copie n'est ajoutée (comportement
+// précédent), l'incident reste tout de même journalisé.
+const PAC_FALLBACK_EMAIL = process.env.PAC_FALLBACK_EMAIL || '';
+
+const UPSTASH_URL   = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Minuscules, sans accents, espaces internes réduits — les identifiants du registre
+// RP contiennent des espaces ("le mans", "la rochelle") sans forme canonique unique.
+function normalizeCampus(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim().replace(/\s+/g, ' ');
+}
+
 // ── Mapping campus → email RP ──
 // Source de vérité : hub emineo-campus-rp (éditable sans redéploiement,
 // via /admin sur ce hub). CAMPUS_RP_FALLBACK n'est utilisé que si le hub
@@ -35,8 +53,8 @@ async function getCampusRPMap() {
     const map = {};
     for (const c of (data.campuses || [])) {
       const emails = (c.rp || []).map(p => p.email).filter(Boolean);
-      if (c.id) map[String(c.id).toLowerCase()] = emails;
-      if (c.label) map[String(c.label).toLowerCase()] = emails;
+      if (c.id) map[normalizeCampus(c.id)] = emails;
+      if (c.label) map[normalizeCampus(c.label)] = emails;
     }
     return map;
   } catch (e) {
@@ -66,6 +84,35 @@ async function markCompleted(email) {
     // Non bloquant — la complétion est best-effort
     console.warn('markCompleted error:', err.message);
     return false;
+  }
+}
+
+const CAMPUS_INCIDENTS_KEY = 'cdrh:bc1:campus-incidents';
+
+// Journalise un campus non résolu (vide ou absent du registre) pour permettre un
+// réacheminement manuel a posteriori — best-effort, ne doit jamais bloquer l'envoi.
+async function logCampusIncident({ email, studentName, bloc, campusReceived }) {
+  const incident = {
+    event: 'campus_unresolved',
+    timestamp: new Date().toISOString(),
+    email, studentName, bloc, campusReceived,
+  };
+  console.warn('campus_unresolved:', JSON.stringify(incident));
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
+  try {
+    // Commande envoyée dans le corps (syntaxe REST Upstash ["RPUSH", clé, valeur]),
+    // jamais dans l'URL — email/studentName sont des données personnelles qui ne
+    // doivent pas finir dans les journaux d'accès Vercel/Upstash.
+    await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(['RPUSH', CAMPUS_INCIDENTS_KEY, JSON.stringify(incident)]),
+    });
+  } catch (err) {
+    console.warn('logCampusIncident redis error:', err.message);
   }
 }
 
@@ -102,6 +149,15 @@ export default async function handler(req, res) {
     const campusRPMap = await getCampusRPMap();
 
     const nomBloc    = bloc || 'BC1 CDRH';
+    const normalizedCampus = normalizeCampus(campus);
+    const resolvedCC = normalizedCampus && campusRPMap[normalizedCampus];
+    const campusResolved = !!(resolvedCC && resolvedCC.length);
+    const cc = campusResolved ? resolvedCC : (PAC_FALLBACK_EMAIL ? [PAC_FALLBACK_EMAIL] : []);
+
+    if (!campusResolved) {
+      await logCampusIncident({ email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    }
+
     const dateStr    = date || new Date().toLocaleDateString('fr-FR');
     const prenom     = studentName ? studentName.split(' ')[0] : 'Étudiant(e)';
     const subject    = `Votre portfolio de compétences PAC — ${nomBloc}`;
@@ -199,7 +255,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from,
         to:       [email],
-        cc:       (campus && campusRPMap[(campus || '').toLowerCase()]) ? campusRPMap[campus.toLowerCase()] : [],
+        cc,
         reply_to: [],
         subject,
         html,
@@ -214,12 +270,13 @@ export default async function handler(req, res) {
       return res.status(200).json({
         sent: false,
         completed,
+        campusResolved,
         warning: 'Email failed but progress saved on portal',
         resendError: resendData,
       });
     }
 
-    return res.status(200).json({ sent: true, completed, id: resendData.id });
+    return res.status(200).json({ sent: true, completed, campusResolved, id: resendData.id });
 
   } catch (err) {
     console.error('send-portfolio handler error:', err);

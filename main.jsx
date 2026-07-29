@@ -28,8 +28,17 @@ window.LUMIO_SESSION = {
   clear: (id) => apiSession('DELETE', id),
 };
 
+// Minuscules, sans accents, espaces internes réduits — pour matcher les identifiants
+// de campus du registre RP ("le mans", "la rochelle") quelle que soit la casse d'origine.
+function normalizeCampus(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim().replace(/\s+/g, ' ');
+}
+
 // Substitue {{PRENOM}} {{NOM}} {{EMAIL_ETUDIANT}} PARTOUT dans LUMIO_DATA, en un seul passage.
-function applyStudent(fullName, email) {
+function applyStudent(fullName, email, campus) {
   // Échappe les seules entrées libres de l'étudiant (vecteur XSS via dangerouslySetInnerHTML).
   // Le narratif de data.js, lui, reste du HTML riche contrôlé et n'est pas touché.
   const escHtml = (s) => String(s == null ? '' : s)
@@ -46,6 +55,7 @@ function applyStudent(fullName, email) {
   window.LUMIO_DATA.student = window.LUMIO_DATA.student || {};
   window.LUMIO_DATA.student.name = fullName;
   if (email) window.LUMIO_DATA.student.email = email;
+  if (campus) window.LUMIO_DATA.student.campus = campus;
   window.LUMIO_DATA.student.initial = (prenom[0] || '?').toUpperCase();
 }
 
@@ -484,8 +494,9 @@ function readPortalParams() {
     const p = (sp.get('p') || '').trim();
     const n = (sp.get('n') || '').trim();
     const e = (sp.get('e') || '').trim().toLowerCase();
+    const c = normalizeCampus(sp.get('c'));
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-    if (p && emailOk) return { prenom: p, nom: n, email: e, fullName: p + (n ? ' ' + n : '') };
+    if (p && emailOk) return { prenom: p, nom: n, email: e, campus: c, fullName: p + (n ? ' ' + n : '') };
   } catch (_) { /* SSR-safe / malformed URL */ }
   return null;
 }
@@ -508,10 +519,11 @@ function Root() {
       localStorage.setItem('lumio_sid', sid);
       setSessionId(sid);
       setStudentName(portal.fullName);
-      applyStudent(portal.fullName, portal.email);
+      applyStudent(portal.fullName, portal.email, portal.campus);
       window.LUMIO_SESSION.save(sid, {
         studentName: portal.fullName,
         studentEmail: portal.email,
+        studentCampus: portal.campus,
         phase: 'brief',
         fromPortal: true
       });
@@ -533,8 +545,8 @@ function Root() {
         setTimerStart(session.timerStart);
         window.LUMIO_TIMER_START = session.timerStart; // FIX : sans ça le timer repartait de 0 au reload
       }
-      // Substituer le nom/email partout dans les données
-      applyStudent(n, session.studentEmail);
+      // Substituer le nom/email/campus partout dans les données
+      applyStudent(n, session.studentEmail, session.studentCampus);
       // Si la session vient du portail (fromPortal) : brief ou desktop, jamais lockscreen
       if (session.fromPortal) {
         setPhase(session.timerStart ? 'desktop' : 'brief');

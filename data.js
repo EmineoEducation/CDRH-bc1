@@ -10,6 +10,7 @@ window.LUMIO_DATA = {
     "name": "{{PRENOM}} {{NOM}}",
     "role": "Consultant·e externe",
     "email": "{{EMAIL_ETUDIANT}}",
+    "campus": "",
     "company": "Indépendant·e",
     "initial": "?"
   },
