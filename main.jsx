@@ -481,10 +481,8 @@ function WelcomeBriefCard({ onClose, studentName }) {
 //  L'identité vient TOUJOURS du portail (?p=&n=&e=&c=).
 // ══════════════════════════════════════════════════════════════
 function getPortalUrl() {
-  var h = (window.location.hostname || '').toLowerCase();
-  if (h.indexOf('cdrh') >= 0) return 'https://cdrh-pac.vercel.app';
-  if (h.indexOf('lumio') >= 0) return 'https://msmc-pac.vercel.app';
-  return 'https://emineo-pac.vercel.app';
+  var titre = ((window.PAC_CONFIG && window.PAC_CONFIG.titreCode) || '').toLowerCase();
+  return titre ? 'https://' + titre + '-pac.vercel.app' : 'https://emineo-pac.vercel.app';
 }
 
 // Si les 3 sont présents ET email valide → bypass NameScreen + lockscreen.

@@ -37,9 +37,10 @@ Local session/identity shortcut: the app **redirects to the portal** if there is
 `http://localhost:3000/?p=Prenom&n=Nom&e=test@example.com`.
 
 Required Vercel env vars: `ANTHROPIC_API_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`,
-`RESEND_API_KEY`, optional `PORTFOLIO_FROM`, optional `PAC_FALLBACK_EMAIL` (CC'd on the portfolio
-email whenever the student's campus can't be resolved to a référent pédagogique — see
-*Portfolio-send chain* below).
+`RESEND_API_KEY`, `PAC_BLOC_KEY` (`"titre:bloc"` lowercase, e.g. `cdrh:bc1` — identifies this
+deployment; see *Portfolio-send chain* below), optional `PORTFOLIO_FROM`, optional
+`PAC_FALLBACK_EMAIL` (CC'd on the portfolio email whenever the student's campus can't be
+resolved to a référent pédagogique — see *Portfolio-send chain* below).
 
 ## Architecture
 
@@ -136,7 +137,12 @@ The jury system prompt is `PAC_CONFIG.juryPrompt` plus a formative/final suffix.
 
 - **`chat.js`** — Anthropic proxy. Requires `model`, `messages`, `max_tokens`.
 - **`session.js`** — Upstash Redis REST at key `lumio:bc1:session:<id>`, 90-day TTL. GET restores, POST merges-then-writes, DELETE resets. Session id is a client-side hash of name + timestamp, cached in `localStorage.lumio_sid`. **The `bc1` in the key prefix is block-specific.**
-- **`send-portfolio.js`** — marks completion on the portal (`POST cdrh-pac.vercel.app/api/progress` with a sha256-truncated email hash, `bloc: 'bc1'`) **before** sending via Resend, so progress survives an email failure. CCs the campus référents pédagogiques resolved from the `emineo-campus-rp` hub (`TITRE_CODE = 'CDRH'`), with `CAMPUS_RP_FALLBACK` if the hub is unreachable. Resend failure returns **200** with `sent: false`.
+- **`send-portfolio.js`** — generic across all 18 blocs (see *Portfolio-send chain* below for the
+  `PAC_BLOC_KEY` mechanism). Marks completion on the portal (`POST <titre>-pac.vercel.app/api/progress`
+  with a sha256-truncated email hash) **before** sending via Resend, so progress survives an email
+  failure. CCs the campus référents pédagogiques resolved from the `emineo-campus-rp` hub (titre-scoped
+  via `?titre=`), with `PAC_FALLBACK_EMAIL` as the sole fallback if the hub is unreachable or the campus
+  is unknown to it. Resend failure returns **200** with `sent: false`.
 
 ### Ecosystem / identity chain
 
@@ -147,8 +153,11 @@ emineo-pac.vercel.app (hub)
 ```
 
 `readPortalParams()` in `main.jsx` bypasses the local NameScreen/lockscreen when `p` + a valid `e` are
-present. `getPortalUrl()` picks the portal by hostname substring (`cdrh` → `cdrh-pac`, `lumio` → `msmc-pac`,
-else `emineo-pac`) and is where the app redirects on logout or a missing session.
+present. `getPortalUrl()` picks the portal from `PAC_CONFIG.titreCode` (`https://<titreCode
+lowercased>-pac.vercel.app`, e.g. `CDRH` → `cdrh-pac`), falling back to `emineo-pac` if `titreCode` is
+unset, and is where the app redirects on logout or a missing session. This makes `main.jsx` itself
+generic — the only per-bloc input is `PAC_CONFIG.titreCode` in `data.js` — unlike the previous
+hostname-substring matching, which also silently fell through to `emineo-pac` on `localhost`.
 
 `NameScreen` / `LoginScreen` in `main.jsx` are the pre-portal fallback path — reachable only when there
 are no portal params *and* a session exists in Redis without `fromPortal`.
@@ -166,15 +175,47 @@ blocks the student's own delivery:
 - `normalizeCampus()` (a second, byte-identical copy — no module system across the browser/serverless
   boundary) is applied both when building `campusRPMap` from the hub and when resolving the incoming
   `campus`, so casing/accent/whitespace variants match the registry.
-- If campus resolution fails (empty or not found in the hub/`CAMPUS_RP_FALLBACK`), the email still goes
-  to the student; the CC falls back to `PAC_FALLBACK_EMAIL` (if configured) instead of an empty CC list,
-  and the response includes `campusResolved: false` so the client can show a plain, non-alarming notice
-  ("your work was received, a référent will be attached manually").
-  Note `CAMPUS_RP_FALLBACK` itself is missing a `la rochelle` entry — the hub is the source of truth for
-  it, so `PAC_FALLBACK_EMAIL` is what covers a hub outage for that campus until the hub adds it.
-- Every unresolved case is logged for manual follow-up: `console.warn` plus a best-effort `RPUSH` to
-  Upstash Redis key `cdrh:bc1:campus-incidents` (command sent in the POST body as
-  `["RPUSH", key, value]`, never in the URL, since the incident contains the student's email/name).
+- The hub (`emineo-campus-rp`, queried with `?titre=<TITRE_CODE>`) is the **sole** source of truth for
+  campus → RP resolution — there is no local fallback map. Verified live: the same campus can resolve to
+  a different RP depending on `titre` (e.g. `le mans` differs between `CDRH` and `MSMC`), so the `titre`
+  param is load-bearing, not decorative — never drop it.
+- If campus resolution fails (empty, or present but unknown to the hub), or the hub itself is
+  unreachable/times out (2.5 s), the email still goes to the student; the CC falls back to
+  `PAC_FALLBACK_EMAIL` (if configured) instead of an empty CC list, and the response includes
+  `campusResolved: false` so the client can show a plain, non-alarming notice ("your work was received, a
+  référent will be attached manually").
+- Every such case is logged for manual follow-up (`console.warn` plus a best-effort `RPUSH` to Upstash
+  Redis, command sent in the POST body as `["RPUSH", key, value]`, never in the URL, since the incident
+  contains the student's email/name) as one of two distinct events, so an infrastructure outage doesn't
+  get miscounted as N isolated campus problems:
+  - `hub_unreachable` — the hub itself didn't respond; affects every send during the outage window.
+  - `campus_unresolved` — the hub responded but doesn't know this campus (typo, or genuinely missing from
+    the registry — e.g. it was missing a `la rochelle` entry before that was traced to this incident
+    stream once).
+
+### Generic across all 18 blocs — `PAC_BLOC_KEY`
+
+`api/send-portfolio.js`, `main.jsx` and `portfolio-card-template.browser.js` are copiable verbatim to
+any of the 18 sibling blocs — only `data.js` and `index.html` are expected to diverge. The one
+per-deployment input on the serverless side is the `PAC_BLOC_KEY` env var, format `"<titre>:<bloc>"`
+lowercase (e.g. `cdrh:bc1`), from which `api/send-portfolio.js` derives everything else:
+`TITRE_CODE` (upper-cased, used for the hub's `?titre=` and the progress-portal host), `BLOC_ID` (used
+as the `nomBloc` fallback and in the completion POST), the Redis incidents key
+(`` `${PAC_BLOC_KEY}:incidents` ``), and `PORTAIL_URL` (`https://<titre>-pac.vercel.app/api/progress` —
+verified correct for `cdrh-pac`/`msmc-pac`, not yet confirmed for `mmd-pac`/`mdo-pac`). If
+`PAC_BLOC_KEY` is missing, the module logs a startup `console.warn` (a silent default would mean
+incidents land in `unknown:incidents`, a channel nobody watches) and everything derived from it falls
+back to `'unknown'`. On the client side, the equivalent input is `PAC_CONFIG.titreCode` in `data.js`
+(see *Ecosystem / identity chain* above) — `main.jsx` has no env vars available in the browser, so that
+value has to live in the one file that's already allowed to diverge.
+
+⚠️ **Trap for the 5 MSMC blocs**: their repos are named `lumio-*` (the shared fictional-universe name,
+"Lumio Health" — see *Ecosystem* above), not `msmc-*`. The repo name is **not** the titre code. For
+these blocs, `PAC_BLOC_KEY` must still be `msmc:bcN` and `data.js`'s `PAC_CONFIG.titreCode` must still
+be `"MSMC"` — never `"LUMIO"` or anything derived from the repo/folder name. Setting either to `LUMIO`
+would make `PORTAIL_URL`/`getPortalUrl()` build `https://lumio-pac.vercel.app`, a domain that doesn't
+exist (the real MSMC portal is `msmc-pac.vercel.app`), silently breaking completion-marking and portal
+redirects for that bloc.
 
 ## Other things worth knowing
 

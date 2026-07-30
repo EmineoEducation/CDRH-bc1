@@ -225,6 +225,7 @@ window.LUMIO_DATA = {
 
 window.PAC_CONFIG = {
   "bloc": "bc1",
+  "titreCode": "CDRH",
   accroche_namescreen: {
     "subtitle": "Une réorganisation RH à structurer",
     "role": "consultant·e RH externe",
@@ -514,7 +515,14 @@ window.PAC_CONFIG = {
   "questionsPositionnement": [],
   "juryPrompt": "Tu es le jury certifiant du bloc 1 (Chargé de développement des ressources humaines — CDRH, RNCP 38438).\nContexte : Opération Pulse — Réorganisation RH post-croissance chez Lumio Health · 14 mars 2025.\nTu évalues une production étudiante aux critères RNCP stricts. Sois exigeant mais juste.\nCritères éliminatoires :\n- L'absence totale de méthodologie de veille juridique (aucune source nommée, aucune fréquence définie) entraîne l'invalidation de la compétence 1.1.\n- Les rôles et responsabilités des acteurs RH impliqués (référent handicap, manager de proximité, DRH, service paie) ne sont pas distingués ou sont confondus : le dossier ne peut être déclaré conforme.\n- Aucun indicateur d'impact chiffré ou mesurable n'est proposé pour évaluer la performance RH ou la réussite du plan d'action : la démonstration de maîtrise des compétences 1.8 et 1.9 est insuffisante.\n- Les erreurs de paie du Document 5 ne sont pas identifiées ou les corrections proposées sont inexactes au regard de la législation sur les IJSS et les charges sociales : la compétence 1.6 est non validée.\n- Le plan d'action RH (compétence 1.9) ne comporte pas de planning formalisé (type Gantt ou équivalent) ou ne mobilise qu'une seule action détaillée : le critère éliminatoire de structuration est activé.\n- L'absence de toute référence au principe d'égalité de rémunération femmes-hommes ou au cadre légal de non-discrimination dans les préconisations salariales invalide la compétence 1.7.\n- La charte télétravail proposée ne mentionne pas la consultation obligatoire du CSE ou ignore les obligations de protection des données : la compétence 1.5 est déclarée non conforme.\n\nRéponds EXACTEMENT dans ce format :\n### 1.1 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.2 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.3 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.4 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.5 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.6 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.7 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.8 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.9 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.10 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n### 1.11 — [Satisfaisant / Insuffisant / Absent]\nUne phrase de retour précise et exigeante.\n\n## Niveau global\n**[Non conforme / Partiellement conforme / Conforme / Conforme avec distinction]**\n\n## Question de jury\nUne question dérangeante que tu poserais à l'oral.",
   "livrableMinMots": 520,
-  "noteReflexiveMinMots": 100
+  "noteReflexiveMinMots": 100,
+  "portfolio": {
+    "missionTitre": "Sécuriser une réorganisation RH en hypercroissance",
+    "miseEnSituation": "Lumio Health signe un contrat B2B majeur avec Northgate Corporation et doit absorber 12 recrutements en quelques semaines, tout en fiabilisant une paie déjà fragile et un contrat de télétravail à mettre en conformité CSE.",
+    "choix": "Un plan d'action RH structuré en trois volets — sécurisation juridique et paie, cadrage du télétravail avec consultation du CSE, prévention et suivi des risques psychosociaux — plutôt qu'une réponse RH au coup par coup.",
+    "justification": "Ce choix répond à l'urgence de conformité (paie, télétravail, égalité salariale) sans sacrifier la prévention : traiter les trois volets ensemble évite qu'une correction ponctuelle masque un risque RH plus large.",
+    "imageSrc": ""
+  }
 };
 // Alias de compatibilité (les apps existantes lisent encore PASS_CONFIG)
 window.PASS_CONFIG = window.PAC_CONFIG;

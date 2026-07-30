@@ -1,14 +1,33 @@
-// api/send-portfolio.js — BC1 CDRH
+// api/send-portfolio.js
 // Envoi du portfolio de compétences par email (Resend)
-// + écriture complétion dans cdrh-pac (Redis via portail)
+// + écriture complétion sur le portail du titre (Redis via portail)
+// Fichier générique — copiable tel quel sur les 18 blocs PAC. Seuls data.js et
+// index.html divergent par bloc (cf. CLAUDE.md).
 // Variables d'environnement Vercel requises :
-//   RESEND_API_KEY   (clé API Resend)
-//   PORTFOLIO_FROM   (optionnel — ex: "PAC Éminéo <portfolio@emineo-education.fr>")
+//   RESEND_API_KEY               (clé API Resend)
+//   PAC_BLOC_KEY                 ("titre:bloc" en minuscules, ex. "cdrh:bc1" — identifie
+//                                 ce déploiement ; dérive TITRE_CODE/BLOC_ID/PORTAIL_URL
+//                                 et la clé d'incidents Redis)
+//   UPSTASH_REDIS_REST_URL/TOKEN  (journalisation des incidents best-effort)
+//   PORTFOLIO_FROM                (optionnel — ex: "PAC Éminéo <portfolio@emineo-education.fr>")
+//   PAC_FALLBACK_EMAIL            (optionnel — copie de repli si le campus n'est pas résolu)
 
 import { createHash } from 'crypto';
 
-const PORTAIL_URL = 'https://cdrh-pac.vercel.app/api/progress';
-const BLOC_ID     = 'bc1';
+const PAC_BLOC_KEY = process.env.PAC_BLOC_KEY || 'unknown';
+if (PAC_BLOC_KEY === 'unknown') {
+  console.warn('PAC_BLOC_KEY absente — les incidents seront journalisés dans "unknown:incidents" (probablement jamais consultés). Configurer la variable d\'environnement Vercel avant mise en production.');
+}
+const [TITRE_RAW, BLOC_RAW] = PAC_BLOC_KEY.split(':');
+const TITRE_CODE   = (TITRE_RAW || 'unknown').toUpperCase();
+const BLOC_ID      = BLOC_RAW || 'unknown';
+const PORTAIL_URL  = `https://${TITRE_RAW || 'unknown'}-pac.vercel.app/api/progress`;
+
+// Numéro RNCP par titre — les 4 entrées sont identiques sur les 18 blocs (le fichier
+// reste copiable tel quel). Pas de mention RNCP dans l'email si TITRE_CODE est inconnu
+// (variable manquante, faute de frappe…) plutôt que d'afficher un numéro faux.
+const RNCP_BY_TITRE = { MSMC: '38504', CDRH: '38438', MMD: '40170', MDO: '35280' };
+const RNCP_CODE = RNCP_BY_TITRE[TITRE_CODE];
 
 // Adresse de repli mise en copie quand le campus n'est pas résolu (vide ou absent du
 // registre) — garantit qu'un portfolio n'est jamais produit sans destinataire
@@ -29,18 +48,11 @@ function normalizeCampus(s) {
 }
 
 // ── Mapping campus → email RP ──
-// Source de vérité : hub emineo-campus-rp (éditable sans redéploiement,
-// via /admin sur ce hub). CAMPUS_RP_FALLBACK n'est utilisé que si le hub
-// est injoignable — l'envoi du portfolio ne doit jamais en dépendre.
+// Source de vérité unique : hub emineo-campus-rp (éditable sans redéploiement,
+// via /admin sur ce hub, et résout les exceptions par titre — vérifié : le même
+// campus peut avoir un RP différent selon TITRE_CODE). Aucun repli local : en cas
+// de panne du hub, PAC_FALLBACK_EMAIL prend le relais et l'incident est journalisé.
 const CAMPUS_RP_HUB = 'https://emineo-campus-rp.vercel.app/api/campus-rp';
-const TITRE_CODE    = 'CDRH'; // MSMC | CDRH | MMD | MDO — résout les exceptions par titre côté hub
-const CAMPUS_RP_FALLBACK = {
-  'paris':    ['chloe.guyot@cesacom.fr', 'celine.maheo@cesacom.fr'],
-  'nantes':   ['manon.parageaud@cesacom.fr', 'lara.naccache@emineo-education.fr'],
-  'bordeaux': ['anthony.nabli@emineo-education.fr'],
-  'le mans':  ['johnny.nicolas@isme.fr'],
-  'lemans':   ['johnny.nicolas@isme.fr'],
-};
 
 async function getCampusRPMap() {
   try {
@@ -56,10 +68,10 @@ async function getCampusRPMap() {
       if (c.id) map[normalizeCampus(c.id)] = emails;
       if (c.label) map[normalizeCampus(c.label)] = emails;
     }
-    return map;
+    return { map, hubOk: true };
   } catch (e) {
-    console.warn('Hub campus-rp injoignable, fallback local:', e.message);
-    return CAMPUS_RP_FALLBACK;
+    console.warn('Hub campus-rp injoignable:', e.message);
+    return { map: {}, hubOk: false };
   }
 }
 
@@ -87,17 +99,16 @@ async function markCompleted(email) {
   }
 }
 
-const CAMPUS_INCIDENTS_KEY = 'cdrh:bc1:campus-incidents';
+// Clé unique pour tout incident best-effort de la chaîne d'envoi (campus non résolu,
+// hub injoignable, carte visuelle non générée, etc.) — un seul endroit à consulter
+// pour réacheminer manuellement a posteriori. Dérivée de PAC_BLOC_KEY pour rester
+// distincte par déploiement même si ce fichier est copié tel quel sur un autre bloc.
+const CAMPUS_INCIDENTS_KEY = `${PAC_BLOC_KEY}:incidents`;
 
-// Journalise un campus non résolu (vide ou absent du registre) pour permettre un
-// réacheminement manuel a posteriori — best-effort, ne doit jamais bloquer l'envoi.
-async function logCampusIncident({ email, studentName, bloc, campusReceived }) {
-  const incident = {
-    event: 'campus_unresolved',
-    timestamp: new Date().toISOString(),
-    email, studentName, bloc, campusReceived,
-  };
-  console.warn('campus_unresolved:', JSON.stringify(incident));
+// Journalise un incident best-effort — ne doit jamais bloquer l'envoi.
+async function logIncident(event, fields) {
+  const incident = { event, timestamp: new Date().toISOString(), ...fields };
+  console.warn(event + ':', JSON.stringify(incident));
   if (!UPSTASH_URL || !UPSTASH_TOKEN) return;
   try {
     // Commande envoyée dans le corps (syntaxe REST Upstash ["RPUSH", clé, valeur]),
@@ -112,7 +123,7 @@ async function logCampusIncident({ email, studentName, bloc, campusReceived }) {
       body: JSON.stringify(['RPUSH', CAMPUS_INCIDENTS_KEY, JSON.stringify(incident)]),
     });
   } catch (err) {
-    console.warn('logCampusIncident redis error:', err.message);
+    console.warn('logIncident redis error:', err.message);
   }
 }
 
@@ -131,7 +142,7 @@ export default async function handler(req, res) {
     let body = req.body;
     if (typeof body === 'string') body = JSON.parse(body);
 
-    const { email, studentName, portfolioHTML, bloc, date, campus } = body || {};
+    const { email, studentName, portfolioHTML, bloc, date, campus, attachments, cardAttempted } = body || {};
 
     if (!email || !portfolioHTML) {
       return res.status(400).json({ error: 'Champs requis manquants : email, portfolioHTML' });
@@ -146,16 +157,35 @@ export default async function handler(req, res) {
     // même si l'envoi de l'email échoue ensuite — cf. principe markCompleted) ──
     const completed = await markCompleted(email);
 
-    const campusRPMap = await getCampusRPMap();
+    const { map: campusRPMap, hubOk } = await getCampusRPMap();
 
-    const nomBloc    = bloc || 'BC1 CDRH';
+    const nomBloc    = bloc || BLOC_ID;
     const normalizedCampus = normalizeCampus(campus);
     const resolvedCC = normalizedCampus && campusRPMap[normalizedCampus];
     const campusResolved = !!(resolvedCC && resolvedCC.length);
     const cc = campusResolved ? resolvedCC : (PAC_FALLBACK_EMAIL ? [PAC_FALLBACK_EMAIL] : []);
 
-    if (!campusResolved) {
-      await logCampusIncident({ email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    if (!hubOk) {
+      // Panne d'infrastructure — touche tous les envois de la fenêtre, pas un campus isolé.
+      await logIncident('hub_unreachable', { email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    } else if (!campusResolved) {
+      await logIncident('campus_unresolved', { email, studentName, bloc: nomBloc, campusReceived: campus || '' });
+    }
+
+    // ── Pièces jointes (carte visuelle) — base64 uniquement, best-effort. Une pièce
+    // malformée est ignorée plutôt que de faire échouer tout l'envoi.
+    const finalAttachments = Array.isArray(attachments)
+      ? attachments
+          .filter(a => a && a.content && a.filename)
+          .map(a => ({
+            filename: String(a.filename),
+            content: String(a.content),
+            content_id: a.content_id ? String(a.content_id) : undefined,
+          }))
+      : [];
+
+    if (cardAttempted && !finalAttachments.length) {
+      await logIncident('card_render_failed', { email, studentName, bloc: nomBloc, cardAttempted: true });
     }
 
     const dateStr    = date || new Date().toLocaleDateString('fr-FR');
@@ -197,8 +227,8 @@ export default async function handler(req, res) {
               généré le <strong>${dateStr}</strong>.
             </p>
             <p style="margin:0;font-size:14px;color:#555;line-height:1.6;">
-              Ce document retrace votre parcours dans l'affaire Lumio Health et
-              l'évaluation IA de vos productions sur les critères du référentiel RNCP 38438.
+              Ce document retrace votre parcours et l'évaluation IA de vos productions sur
+              les critères du référentiel${RNCP_CODE ? ' RNCP ' + RNCP_CODE : ''}.
             </p>
           </td>
         </tr>
@@ -259,6 +289,7 @@ export default async function handler(req, res) {
         reply_to: [],
         subject,
         html,
+        ...(finalAttachments.length ? { attachments: finalAttachments } : {}),
       }),
     });
 
@@ -283,3 +314,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erreur serveur', message: err.message, sent: false });
   }
 }
+
+// La carte visuelle en pièce jointe (base64 inline) peut faire dépasser la limite
+// par défaut du body parser Vercel — l'élargir explicitement, comme la référence.
+export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
