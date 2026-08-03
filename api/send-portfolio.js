@@ -10,7 +10,13 @@
 //                                 et la clé d'incidents Redis)
 //   UPSTASH_REDIS_REST_URL/TOKEN  (journalisation des incidents best-effort)
 //   PORTFOLIO_FROM                (optionnel — ex: "PAC Éminéo <portfolio@emineo-education.fr>")
-//   PAC_FALLBACK_EMAIL            (optionnel — copie de repli si le campus n'est pas résolu)
+//   PAC_FALLBACK_EMAIL            (optionnel — copie de repli si le campus n'est pas résolu ;
+//                                 sert aussi d'adresse de réponse de repli)
+//
+// Adresse de réponse : l'expéditeur est une adresse no-reply technique. Le reply-to est
+// positionné sur le·s référent·s du campus résolu·s par le hub, à défaut sur
+// PAC_FALLBACK_EMAIL. Si ni l'un ni l'autre n'est disponible, aucun reply-to n'est envoyé
+// (les réponses retomberaient sur le no-reply) et l'encart de l'email le dit explicitement.
 
 import { createHash } from 'crypto';
 
@@ -165,6 +171,11 @@ export default async function handler(req, res) {
     const campusResolved = !!(resolvedCC && resolvedCC.length);
     const cc = campusResolved ? resolvedCC : (PAC_FALLBACK_EMAIL ? [PAC_FALLBACK_EMAIL] : []);
 
+    // Adresse de réponse — même résolution que le cc : l'apprenant qui répond à son
+    // portfolio doit tomber sur son référent campus, jamais sur le no-reply technique.
+    // Resend accepte un tableau ; on ne transmet pas la clé si elle est vide.
+    const replyTo = cc.slice(0, 3);
+
     if (!hubOk) {
       // Panne d'infrastructure — touche tous les envois de la fenêtre, pas un campus isolé.
       await logIncident('hub_unreachable', { email, studentName, bloc: nomBloc, campusReceived: campus || '' });
@@ -253,8 +264,9 @@ export default async function handler(req, res) {
             <div style="background:#E3FFF0;border-left:4px solid #5DE298;
                         padding:12px 16px;border-radius:0 6px 6px 0;">
               <p style="margin:0;font-size:12px;color:#134547;">
-                ⚠️ Cet email est envoyé depuis une adresse <strong>no-reply</strong>. 
-                Pour toute question, contactez directement votre référent Éminéo.
+                ${replyTo.length
+                  ? 'Cet email est envoyé depuis une adresse technique, mais vous pouvez <strong>répondre directement</strong> à ce message : votre réponse arrivera à votre référent Éminéo.'
+                  : '⚠️ Cet email est envoyé depuis une adresse <strong>no-reply</strong>. Pour toute question, contactez directement votre référent Éminéo.'}
               </p>
             </div>
           </td>
@@ -264,7 +276,7 @@ export default async function handler(req, res) {
         <tr>
           <td style="background:#0B2B2D;padding:20px 32px;">
             <p style="margin:0;font-size:12px;color:#E3FFF0;opacity:0.6;text-align:center;">
-              Éminéo Education · RNCP 38438 · PAC ${nomBloc} · ${dateStr}
+              Éminéo Education${RNCP_CODE ? ' · RNCP ' + RNCP_CODE : ''} · PAC ${nomBloc} · ${dateStr}
             </p>
           </td>
         </tr>
@@ -286,7 +298,7 @@ export default async function handler(req, res) {
         from,
         to:       [email],
         cc,
-        reply_to: [],
+        ...(replyTo.length ? { reply_to: replyTo } : {}),
         subject,
         html,
         ...(finalAttachments.length ? { attachments: finalAttachments } : {}),
@@ -315,6 +327,9 @@ export default async function handler(req, res) {
   }
 }
 
-// La carte visuelle en pièce jointe (base64 inline) peut faire dépasser la limite
-// par défaut du body parser Vercel — l'élargir explicitement, comme la référence.
+// La carte visuelle est transmise en base64 dans le corps de la requête. 4 Mo est la
+// valeur maximale utile : Vercel refuse au niveau plateforme (413) tout corps de requête
+// dépassant ~4,5 Mo, quelle que soit la valeur déclarée ici. Ne pas monter à 10 Mo en
+// croyant élargir quoi que ce soit — la seule marge de manœuvre est côté client
+// (compression/qualité des images dans app-livrable.jsx). Mesure actuelle : ~412 Ko.
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
