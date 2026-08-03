@@ -253,7 +253,9 @@ function LivrableApp() {
       const html = "<div style=\"font-family:'IBM Plex Sans',sans-serif;max-width:680px;margin:auto;color:#0B2B2D\">" +
         visualHtml +
         "<div style=\"background:#0B2B2D;padding:24px 28px;border-radius:10px 10px 0 0\">" +
-        "<img src=\"https://emineo-pac.vercel.app/logo-emineo-white.png\" alt=\"Éminéo\" style=\"height:28px;margin-bottom:12px\" />" +
+        // Logo retiré le 03/08/2026 : le fichier n'existe pas sur emineo-pac.vercel.app
+        // (Vercel renvoie la page du portail), ce qui affichait un carré vide dans tous
+        // les emails. Le bandeau serveur porte déjà l'identité « Éminéo Education · PAC ».
         "<h1 style=\"color:#5DE298;font-size:20px;margin:0 0 4px\">Portfolio de compétences</h1>" +
         "<p style=\"color:#E3FFF0;font-size:13px;margin:0\">" + (stu.name || "") + " · " + (cfg.dispositif || "PAC") + " " + (cfg.bloc || "") + " · " + (cfg.titre || cfg.epreuve || "") + "</p>" +
         "</div>" +
